@@ -8,9 +8,9 @@ import com.google.common.eventbus.Subscribe;
  * @date 2019/11/27 2:26 下午
  * @version 1.0
  **/
-public interface MQListener {
+public interface BusListener {
 
     @Subscribe
-    void handler(Object o);
+    void listenHandler(Object o);//监听到消息后的处理函数
 
 }

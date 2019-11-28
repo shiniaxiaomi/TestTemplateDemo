@@ -13,8 +13,6 @@ public class User implements Serializable {
 
     private Integer age;
 
-    private String hobby;
-
     private static final long serialVersionUID = 1L;
 
     public Integer getId() {
@@ -39,13 +37,5 @@ public class User implements Serializable {
 
     public void setAge(Integer age) {
         this.age = age;
-    }
-
-    public String getHobby() {
-        return hobby;
-    }
-
-    public void setHobby(String hobby) {
-        this.hobby = hobby;
     }
 }

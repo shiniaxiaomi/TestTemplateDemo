@@ -1,32 +1,42 @@
-package com.lyj.demo.listener;
+package com.lyj.demo.listener.impl;
 
-import com.google.common.eventbus.EventBus;
+import com.alibaba.fastjson.JSON;
+import com.lyj.demo.listener.BusListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import javax.annotation.PostConstruct;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * todo消息监听
  * @author yingjie.lu
+ * @date 2019/11/28 9:58 上午
  * @version 1.0
- * @date 2019/11/27 2:47 下午
- */
-
+ **/
 @Component
-public class TodoListener implements BusListener{
+public class TodoListener implements BusListener {
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
-    @Override
+    //同步消息队列，存储用于发往mq的消息
+    public static Queue todoQueue = new ConcurrentLinkedQueue();
+
     public void listenHandler(Object o) {
-        System.out.println("xiaoxi:"+o);
+        todoQueue.add(o);
     }
 
-    public static void main(String[] args) throws IOException {
-
-        while (true){
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            Bus.todoBus.post(reader.readLine());
-        }
-
+    @PostConstruct
+    public void sendToMQ() {
+        (new Thread(() -> {
+            while(true) {
+                if (todoQueue.size() != 0) {
+                    Object poll = todoQueue.poll();
+                    this.rabbitTemplate.convertSendAndReceive("test", JSON.toJSONString(poll));
+                }
+            }
+        })).start();
     }
 }
